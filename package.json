@@ -1,13 +1,14 @@
 {
-  "name": "post-scraper",
+  "name": "link-scraper",
   "version": "1.0.0",
-  "main": "scraper.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node scraper.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "axios": "^0.21.1",
     "cheerio": "^1.0.0-rc.3",
+    "express": "^4.17.1",
     "dotenv": "^10.0.0"
   }
 }
