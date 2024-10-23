@@ -4,7 +4,7 @@ const cheerio = require('cheerio');
 // Replace these with your credentials
 const BOT_TOKEN = '7820729855:AAG_ph7Skh4SqGxIWYYcRNigQqCKdnVW354';
 const CHAT_ID = '1894915577';
-const URL = 'https://example.com';  // Replace with the target URL
+const URL = 'https://www.1tamilmv.wf/';  // Replace with the target URL
 
 async function sendTelegramMessage(text, imageUrl = null) {
   try {
