@@ -3,11 +3,11 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const readline = require('readline');
 
-// Telegram bot details (from environment variables)
-const BOT_TOKEN = process.env.BOT_TOKEN; // Load from environment variable
-const CHAT_ID = process.env.CHAT_ID;     // Load from environment variable
+// Telegram bot details
+const BOT_TOKEN = process.env.BOT_TOKEN; 
+const CHAT_ID = process.env.CHAT_ID;     
 
-// Function to send a Telegram message
+// Function to send a message to Telegram
 async function sendTelegramMessage(text) {
     const messageUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
     try {
@@ -17,15 +17,15 @@ async function sendTelegramMessage(text) {
     }
 }
 
-// Function to scrape all links from a given URL
+// Function to scrape links from a given URL
 async function scrapeLinks(targetURL) {
     try {
-        console.log('Starting the scraping process for:', targetURL); // Start message
+        console.log('Starting the scraping process for:', targetURL); 
         const { data } = await axios.get(targetURL);
         const $ = cheerio.load(data);
         const foundLinks = [];
 
-        // Adjust the selector based on the site's structure
+        // Extract all links
         $('a').each((index, element) => {
             const link = $(element).attr('href');
             if (link) {
@@ -35,7 +35,7 @@ async function scrapeLinks(targetURL) {
 
         console.log('Found links:', foundLinks);
 
-        // Notify about found links
+        // Notify Telegram for each found link
         for (const link of foundLinks) {
             await sendTelegramMessage(`Link Found: ${link}`);
         }
@@ -53,6 +53,10 @@ async function promptForUrl() {
         input: process.stdin,
         output: process.stdout
     });
+
+    // Start message
+    console.log("Welcome to the Link Scraper Bot!");
+    console.log("You can input any valid URL, and I will scrape all the links from that page.");
 
     rl.question('Enter the URL you want to scrape: ', async (url) => {
         await scrapeLinks(url);
