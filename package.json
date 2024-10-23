@@ -1,0 +1,12 @@
+{
+  "name": "post-scraper",
+  "version": "1.0.0",
+  "main": "scraper.js",
+  "scripts": {
+    "start": "node scraper.js"
+  },
+  "dependencies": {
+    "axios": "^0.21.1",
+    "cheerio": "^1.0.0-rc.3"
+  }
+}
