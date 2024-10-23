@@ -1,9 +1,10 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-const BOT_TOKEN = '7820729855:AAG_ph7Skh4SqGxIWYYcRNigQqCKdnVW354'; // Replace with your token
-const CHAT_ID = '1894915577'; // Replace with your chat ID
-const URL = 'https://www.1tamilmv.wf/'; // Replace with the target URL
+// Replace these with your credentials
+const BOT_TOKEN = '7820729855:AAG_ph7Skh4SqGxIWYYcRNigQqCKdnVW354';
+const CHAT_ID = '1894915577';
+const URL = 'https://example.com';  // Replace with the target URL
 
 async function sendTelegramMessage(text, imageUrl = null) {
   try {
@@ -24,7 +25,7 @@ async function scrapeLatestPost() {
     const response = await axios.get(URL);
     const $ = cheerio.load(response.data);
 
-    const post = $('div.post').first(); // Adjust the selector
+    const post = $('div.post').first();
     const title = post.find('a').text();
     const link = post.find('a').attr('href');
     const poster = post.find('img').attr('src');
@@ -36,10 +37,5 @@ async function scrapeLatestPost() {
   }
 }
 
-exports.handler = async (event, context) => {
-  await scrapeLatestPost();
-  return {
-    statusCode: 200,
-    body: JSON.stringify({ message: 'Notification sent!' }),
-  };
-};
+// Call the function to execute the bot's logic
+scrapeLatestPost();
