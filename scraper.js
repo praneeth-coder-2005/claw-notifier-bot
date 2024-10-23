@@ -19,20 +19,20 @@ async function sendTelegramMessage(text) {
     }
 }
 
-// Function to scrape all links from a specific post URL
-async function scrapePostLinks(targetURL) {
+// Function to scrape all post links from the main page
+async function scrapeAllPostLinks(targetURL) {
     try {
         console.log('Starting the scraping process for:', targetURL); // Start message
         const { data } = await axios.get(targetURL);
         const $ = cheerio.load(data);
         const postLinks = [];
 
-        // Scrape all links from the post
+        // Adjust the selector based on the site's structure
         $('a').each((index, element) => {
             const link = $(element).attr('href');
-            // Check for valid links and ensure they haven't been seen before
-            if (link && !seenLinks.has(link)) {
-                postLinks.push(link);
+            // Check if the link is relevant to posts and not seen before
+            if (link && link.includes('/post/') && !seenLinks.has(link)) {
+                postLinks.push(link.startsWith('http') ? link : targetURL + link);
                 seenLinks.add(link); // Add to seen links to prevent duplicates
             }
         });
@@ -53,6 +53,6 @@ async function scrapePostLinks(targetURL) {
 
 // Main function to execute the scraper
 (async () => {
-    const targetURL = 'https://site.trooporiginals.cloud/some-valid-post'; // Replace with the actual post link
-    await scrapePostLinks(targetURL);
+    const targetURL = 'https://site.trooporiginals.cloud/'; // Change to the homepage or category page
+    await scrapeAllPostLinks(targetURL);
 })();
