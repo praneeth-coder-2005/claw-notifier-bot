@@ -6,6 +6,9 @@ const cheerio = require('cheerio');
 const BOT_TOKEN = process.env.BOT_TOKEN; // Load from environment variable
 const CHAT_ID = process.env.CHAT_ID;     // Load from environment variable
 
+// Set to store previously seen links
+const seenLinks = new Set();
+
 // Function to send a Telegram message
 async function sendTelegramMessage(text) {
     const messageUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
@@ -16,28 +19,31 @@ async function sendTelegramMessage(text) {
     }
 }
 
-// Function to scrape all post links from the target URL
+// Function to scrape all links from a specific post URL
 async function scrapePostLinks(targetURL) {
     try {
-        console.log('Starting the scraping process...'); // Start message
+        console.log('Starting the scraping process for:', targetURL); // Start message
         const { data } = await axios.get(targetURL);
         const $ = cheerio.load(data);
         const postLinks = [];
 
-        // Adjust the selector based on the site's structure
+        // Scrape all links from the post
         $('a').each((index, element) => {
             const link = $(element).attr('href');
-            // Check if the link contains relevant criteria for posts
-            if (link) {
-                postLinks.push(link.startsWith('http') ? link : targetURL + link);
+            // Check for valid links and ensure they haven't been seen before
+            if (link && !seenLinks.has(link)) {
+                postLinks.push(link);
+                seenLinks.add(link); // Add to seen links to prevent duplicates
             }
         });
 
         console.log('Found post links:', postLinks);
-        // Send links to Telegram
+
+        // Notify about new links found
         for (const postLink of postLinks) {
-            await sendTelegramMessage(`Found link: ${postLink}`);
+            await sendTelegramMessage(`New Link Found: ${postLink}`);
         }
+
         return postLinks;
     } catch (error) {
         console.error('Error scraping links:', error.message);
@@ -47,6 +53,6 @@ async function scrapePostLinks(targetURL) {
 
 // Main function to execute the scraper
 (async () => {
-    const targetURL = 'https://site.trooporiginals.cloud/'; // The website to scrape
+    const targetURL = 'https://example.com/post-link'; // Replace with the post link you want to scrape
     await scrapePostLinks(targetURL);
 })();
