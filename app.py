@@ -16,6 +16,8 @@ def scrape_links(url):
 
 @app.route('/', methods=['POST'])
 def scrape():
+    print(request.headers)  # Log headers to confirm they are correct
+
     if request.content_type != 'application/json':
         return jsonify({"error": "Unsupported Media Type. Use 'application/json'."}), 415
     
@@ -28,5 +30,4 @@ def scrape():
     return jsonify({"links": links})
 
 if __name__ == '__main__':
-    # Use '0.0.0.0' for host and port from environment variables for Render
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
