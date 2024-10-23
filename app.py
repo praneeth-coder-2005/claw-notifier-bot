@@ -16,12 +16,12 @@ def scrape_links(url):
 
 @app.route('/', methods=['POST'])
 def scrape():
-    print(request.headers)  # Log headers to confirm they are correct
+    # Try to parse JSON regardless of Content-Type issues
+    try:
+        data = request.get_json(force=True)  # Force JSON parsing
+    except Exception as e:
+        return jsonify({"error": f"Invalid JSON: {str(e)}"}), 400
 
-    if request.content_type != 'application/json':
-        return jsonify({"error": "Unsupported Media Type. Use 'application/json'."}), 415
-    
-    data = request.get_json()
     if not data or 'url' not in data:
         return jsonify({"error": "URL is required in JSON format."}), 400
     
