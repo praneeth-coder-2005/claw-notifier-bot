@@ -5,6 +5,7 @@ import os
 
 app = Flask(__name__)
 
+# Function to scrape links from a given URL
 def scrape_links(url):
     try:
         response = requests.get(url)
@@ -14,20 +15,10 @@ def scrape_links(url):
     except Exception as e:
         return [f"Error: {str(e)}"]
 
+# API endpoint to accept POST requests
 @app.route('/', methods=['POST'])
 def scrape():
-    print(f"Request headers: {request.headers}")  # Log headers
-    print(f"Request data: {request.data}")  # Log raw request body
-
-    if not request.data:
-        return jsonify({"error": "Empty request body."}), 400
-
-    try:
-        data = request.get_json(force=True)  # Force JSON parsing
-        print(f"Parsed JSON data: {data}")  # Log parsed JSON
-    except Exception as e:
-        return jsonify({"error": f"Invalid JSON: {str(e)}"}), 400
-
+    data = request.get_json(force=True, silent=True)  # Force JSON parsing, ignore errors silently
     if not data or 'url' not in data:
         return jsonify({"error": "URL is required in JSON format."}), 400
 
@@ -36,4 +27,5 @@ def scrape():
     return jsonify({"links": links})
 
 if __name__ == '__main__':
+    # Ensure the app runs on the correct host and port for Render
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
