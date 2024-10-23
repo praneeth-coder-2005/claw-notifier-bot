@@ -1,5 +1,20 @@
+require('dotenv').config(); // Load environment variables
 const axios = require('axios');
 const cheerio = require('cheerio');
+
+// Telegram bot details (from environment variables)
+const BOT_TOKEN = process.env.BOT_TOKEN; // Load from environment variable
+const CHAT_ID = process.env.CHAT_ID;     // Load from environment variable
+
+// Function to send a Telegram message
+async function sendTelegramMessage(text) {
+    const messageUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+    try {
+        await axios.post(messageUrl, { chat_id: CHAT_ID, text });
+    } catch (error) {
+        console.error('Failed to send message:', error.message);
+    }
+}
 
 // Function to scrape all post links from a target URL
 async function scrapePostLinks(targetURL) {
