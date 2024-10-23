@@ -16,9 +16,14 @@ def scrape_links(url):
 
 @app.route('/', methods=['POST'])
 def scrape():
-    url = request.json.get('url')
-    if not url:
-        return jsonify({"error": "URL is required"}), 400
+    if request.content_type != 'application/json':
+        return jsonify({"error": "Unsupported Media Type. Use 'application/json'."}), 415
+    
+    data = request.get_json()
+    if not data or 'url' not in data:
+        return jsonify({"error": "URL is required in JSON format."}), 400
+    
+    url = data['url']
     links = scrape_links(url)
     return jsonify({"links": links})
 
