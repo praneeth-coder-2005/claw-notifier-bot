@@ -1,14 +1,19 @@
-
 require('dotenv').config(); // Load environment variables
 const express = require('express');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const path = require('path');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware to parse JSON requests
 app.use(express.json());
+
+// Serve the HTML file for the root URL
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // Function to scrape links from a given URL
 const scrapeLinks = async (url) => {
