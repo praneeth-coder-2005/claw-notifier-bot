@@ -1,9 +1,9 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
 
-const BOT_TOKEN = 'your_telegram_bot_token'; // Replace with your token
-const CHAT_ID = 'your_chat_id'; // Replace with your chat ID
-const URL = 'https://example.com'; // Replace with the target URL
+const BOT_TOKEN = '7820729855:AAG_ph7Skh4SqGxIWYYcRNigQqCKdnVW354'; // Replace with your token
+const CHAT_ID = '1894915577'; // Replace with your chat ID
+const URL = 'https://www.1tamilmv.wf/'; // Replace with the target URL
 
 async function sendTelegramMessage(text, imageUrl = null) {
   try {
