@@ -22,14 +22,11 @@ const scrapeDownloadLinks = async (url) => {
         const $ = cheerio.load(data);
         const downloadLinks = [];
 
-        // Debug: Log the full HTML content
-        console.log('HTML Data:', data); // Check what is being fetched
-
-        // Adjust this selector based on the actual HTML structure
+        // Adjust this selector to match the download links in the site's HTML structure
         $('a').each((index, element) => {
             const link = $(element).attr('href');
-            // Check for download link pattern
-            if (link && link.includes("download")) {
+            // Check if the link is a download link based on its structure
+            if (link && (link.includes("download") || link.startsWith("/download"))) {
                 downloadLinks.push(link.startsWith('http') ? link : url + link);
             }
         });
