@@ -15,29 +15,29 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Function to scrape links from a given URL
-const scrapeLinks = async (url) => {
+// Function to scrape download links from a given URL
+const scrapeDownloadLinks = async (url) => {
     try {
         const { data } = await axios.get(url);
         const $ = cheerio.load(data);
-        const links = [];
+        const downloadLinks = [];
 
-        // Extract all links
-        $('a').each((index, element) => {
+        // Adjust this selector to match the download links in the site's HTML structure
+        $('a[href*="download"]').each((index, element) => {
             const link = $(element).attr('href');
             if (link) {
-                links.push(link.startsWith('http') ? link : url + link);
+                downloadLinks.push(link.startsWith('http') ? link : url + link);
             }
         });
 
-        return links;
+        return downloadLinks;
     } catch (error) {
         console.error('Error scraping links:', error.message);
-        throw new Error('Failed to scrape links');
+        throw new Error('Failed to scrape download links');
     }
 };
 
-// Endpoint to scrape links
+// Endpoint to scrape download links
 app.post('/scrape', async (req, res) => {
     const { url } = req.body;
     if (!url) {
@@ -45,7 +45,7 @@ app.post('/scrape', async (req, res) => {
     }
 
     try {
-        const links = await scrapeLinks(url);
+        const links = await scrapeDownloadLinks(url);
         return res.json({ links });
     } catch (error) {
         return res.status(500).json({ error: error.message });
