@@ -16,15 +16,17 @@ def scrape_links(url):
 
 @app.route('/', methods=['POST'])
 def scrape():
-    # Try to parse JSON regardless of Content-Type issues
+    if not request.data:  # Ensure there's a request body
+        return jsonify({"error": "Empty request body."}), 400
+
     try:
-        data = request.get_json(force=True)  # Force JSON parsing
+        data = request.get_json(force=True)  # Try to parse JSON even if content-type is wrong
     except Exception as e:
         return jsonify({"error": f"Invalid JSON: {str(e)}"}), 400
 
     if not data or 'url' not in data:
         return jsonify({"error": "URL is required in JSON format."}), 400
-    
+
     url = data['url']
     links = scrape_links(url)
     return jsonify({"links": links})
