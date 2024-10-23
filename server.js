@@ -22,12 +22,15 @@ const scrapeDownloadLinks = async (url) => {
         const $ = cheerio.load(data);
         const downloadLinks = [];
 
+        // Log the fetched HTML content for debugging
+        console.log('Fetched HTML:', data);
+
         // Adjust this selector to match the download links in the site's HTML structure
         $('a').each((index, element) => {
             const link = $(element).attr('href');
-            // Check if the link is a download link based on its structure
-            if (link && (link.includes("download") || link.startsWith("/download"))) {
-                downloadLinks.push(link.startsWith('http') ? link : url + link);
+            // Check for specific patterns in the link
+            if (link && (link.includes('download') || link.endsWith('.zip') || link.endsWith('.rar'))) {
+                downloadLinks.push(link.startsWith('http') ? link : new URL(link, url).href); // Convert relative links to absolute
             }
         });
 
