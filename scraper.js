@@ -1,13 +1,11 @@
 require('dotenv').config(); // Load environment variables
 const axios = require('axios');
 const cheerio = require('cheerio');
+const readline = require('readline');
 
 // Telegram bot details (from environment variables)
 const BOT_TOKEN = process.env.BOT_TOKEN; // Load from environment variable
 const CHAT_ID = process.env.CHAT_ID;     // Load from environment variable
-
-// Set to store previously seen links
-const seenLinks = new Set();
 
 // Function to send a Telegram message
 async function sendTelegramMessage(text) {
@@ -19,40 +17,50 @@ async function sendTelegramMessage(text) {
     }
 }
 
-// Function to scrape all post links from the main page
-async function scrapeAllPostLinks(targetURL) {
+// Function to scrape all links from a given URL
+async function scrapeLinks(targetURL) {
     try {
         console.log('Starting the scraping process for:', targetURL); // Start message
         const { data } = await axios.get(targetURL);
         const $ = cheerio.load(data);
-        const postLinks = [];
+        const foundLinks = [];
 
-        // Adjust the selector based on the site's structure
+        // Scrape all links from the provided URL
         $('a').each((index, element) => {
             const link = $(element).attr('href');
-            // Check if the link is relevant to posts and not seen before
-            if (link && link.includes('/post/') && !seenLinks.has(link)) {
-                postLinks.push(link.startsWith('http') ? link : targetURL + link);
-                seenLinks.add(link); // Add to seen links to prevent duplicates
+            if (link) {
+                foundLinks.push(link.startsWith('http') ? link : targetURL + link);
             }
         });
 
-        console.log('Found post links:', postLinks);
+        console.log('Found links:', foundLinks);
 
-        // Notify about new links found
-        for (const postLink of postLinks) {
-            await sendTelegramMessage(`New Link Found: ${postLink}`);
+        // Notify about found links
+        for (const link of foundLinks) {
+            await sendTelegramMessage(`Link Found: ${link}`);
         }
 
-        return postLinks;
+        return foundLinks;
     } catch (error) {
         console.error('Error scraping links:', error.message);
         return [];
     }
 }
 
+// Function to prompt the user for a URL
+async function promptForUrl() {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    rl.question('Enter the URL you want to scrape: ', async (url) => {
+        await scrapeLinks(url);
+        rl.close();
+    });
+}
+
 // Main function to execute the scraper
 (async () => {
-    const targetURL = 'https://site.trooporiginals.cloud/'; // Change to the homepage or category page
-    await scrapeAllPostLinks(targetURL);
+    await promptForUrl();
 })();
