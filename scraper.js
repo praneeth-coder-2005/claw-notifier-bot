@@ -53,6 +53,6 @@ async function scrapePostLinks(targetURL) {
 
 // Main function to execute the scraper
 (async () => {
-    const targetURL = 'https://example.com/post-link'; // Replace with the post link you want to scrape
+    const targetURL = 'https://site.trooporiginals.cloud/some-valid-post'; // Replace with the actual post link
     await scrapePostLinks(targetURL);
 })();
