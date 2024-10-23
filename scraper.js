@@ -16,7 +16,7 @@ async function sendTelegramMessage(text) {
     }
 }
 
-// Function to scrape all post links from a target URL
+// Function to scrape all post links from the target URL
 async function scrapePostLinks(targetURL) {
     try {
         console.log('Starting the scraping process...'); // Start message
@@ -27,13 +27,17 @@ async function scrapePostLinks(targetURL) {
         // Adjust the selector based on the site's structure
         $('a').each((index, element) => {
             const link = $(element).attr('href');
-            // Check if the link contains "/post/" or any relevant criteria for posts
-            if (link && link.includes('/post/')) {
+            // Check if the link contains relevant criteria for posts
+            if (link) {
                 postLinks.push(link.startsWith('http') ? link : targetURL + link);
             }
         });
 
         console.log('Found post links:', postLinks);
+        // Send links to Telegram
+        for (const postLink of postLinks) {
+            await sendTelegramMessage(`Found link: ${postLink}`);
+        }
         return postLinks;
     } catch (error) {
         console.error('Error scraping links:', error.message);
@@ -43,6 +47,6 @@ async function scrapePostLinks(targetURL) {
 
 // Main function to execute the scraper
 (async () => {
-    const targetURL = 'https://www.1tamilmv.wf/'; // Replace with the website you want to scrape
+    const targetURL = 'https://site.trooporiginals.cloud/'; // The website to scrape
     await scrapePostLinks(targetURL);
 })();
