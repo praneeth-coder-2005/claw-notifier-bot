@@ -25,7 +25,7 @@ async function scrapeLinks(targetURL) {
         const $ = cheerio.load(data);
         const foundLinks = [];
 
-        // Scrape all links from the provided URL
+        // Adjust the selector based on the site's structure
         $('a').each((index, element) => {
             const link = $(element).attr('href');
             if (link) {
