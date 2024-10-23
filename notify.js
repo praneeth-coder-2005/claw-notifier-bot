@@ -1,12 +1,14 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+const WebTorrent = require('webtorrent');
 const fs = require('fs');
 const path = require('path');
+const axios = require('axios');
 
-// Replace these values
+// Initialize WebTorrent client
+const client = new WebTorrent();
+
+// Telegram bot details
 const BOT_TOKEN = '7820729855:AAG_ph7Skh4SqGxIWYYcRNigQqCKdnVW354';
 const CHAT_ID = '1894915577';
-const URL = 'https://example.com';  // Replace with your legal target URL
 
 // Function to send a Telegram message
 async function sendTelegramMessage(text) {
@@ -18,53 +20,31 @@ async function sendTelegramMessage(text) {
   }
 }
 
-// Function to download new content (mirroring/leeching)
-async function downloadFile(fileUrl) {
-  const fileName = path.basename(fileUrl);
-  const filePath = path.join(__dirname, fileName);
+// Function to download a magnet link
+function downloadMagnet(magnetURI) {
+  console.log('Starting torrent download...');
 
-  const writer = fs.createWriteStream(filePath);
-  const response = await axios({
-    url: fileUrl,
-    method: 'GET',
-    responseType: 'stream'
-  });
+  client.add(magnetURI, { path: path.join(__dirname, 'downloads') }, (torrent) => {
+    console.log(`Downloading: ${torrent.name}`);
 
-  response.data.pipe(writer);
+    // Progress handler
+    torrent.on('download', () => {
+      console.log(`Progress: ${(torrent.progress * 100).toFixed(2)}%`);
+    });
 
-  return new Promise((resolve, reject) => {
-    writer.on('finish', resolve);
-    writer.on('error', reject);
-  });
-}
-
-// Function to scrape the latest post and check for new files
-async function scrapeLatestPost() {
-  try {
-    const response = await axios.get(URL);
-    const $ = cheerio.load(response.data);
-
-    // Example selectors - Adjust based on the target site's structure
-    const post = $('div.post').first();
-    const title = post.find('a').text().trim();
-    const link = post.find('a').attr('href');
-    const fileUrl = post.find('a.download').attr('href');  // Example: File download link
-
-    if (title && link && fileUrl) {
-      const message = `New Post Found: ${title}\nLink: ${link}`;
-      await sendTelegramMessage(message);
-
-      // Start downloading the new file
-      console.log(`Downloading: ${fileUrl}`);
-      await downloadFile(fileUrl);
+    // Finished handler
+    torrent.on('done', async () => {
       console.log('Download complete!');
-    } else {
-      console.log('No new content found.');
-    }
-  } catch (error) {
-    console.error('Error scraping the site:', error.message);
-  }
+      await sendTelegramMessage(`Download complete: ${torrent.name}`);
+      client.destroy(); // Clean up the client
+    });
+  });
+
+  client.on('error', (err) => {
+    console.error('Torrent error:', err.message);
+  });
 }
 
-// Run the bot logic
-scrapeLatestPost();
+// Example usage - Replace this with a real magnet link
+const magnetURI = 'magnet:?xt=urn:btih:EXAMPLE1234567890';  // Replace with your legal magnet link
+downloadMagnet(magnetURI);
