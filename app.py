@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, request, jsonify
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -14,13 +14,13 @@ def scrape_links(url):
     except Exception as e:
         return [f"Error: {str(e)}"]
 
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    if request.method == 'POST':
-        url = request.form['url']
-        links = scrape_links(url)
-        return render_template('index.html', links=links, url=url)
-    return render_template('index.html')
+@app.route('/', methods=['POST'])
+def scrape():
+    url = request.json.get('url')
+    if not url:
+        return jsonify({"error": "URL is required"}), 400
+    links = scrape_links(url)
+    return jsonify({"links": links})
 
 if __name__ == '__main__':
     # Use '0.0.0.0' for host and port from environment variables for Render
