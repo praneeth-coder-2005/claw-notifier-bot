@@ -1,14 +1,19 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const fs = require('fs');
 const WebTorrent = require('webtorrent');
 const path = require('path');
 
-// Initialize the WebTorrent client
 const client = new WebTorrent();
 
 // Telegram bot details
 const BOT_TOKEN = '7820729855:AAG_ph7Skh4SqGxIWYYcRNigQqCKdnVW354'; // Replace with your bot token
 const CHAT_ID = '1894915577';               // Replace with your chat ID
+
+// Load settings from a JSON file
+let settings = {
+    urlsToMonitor: ['https://www.1tamilmv.wf/'] // Replace with your desired URLs
+};
 
 // Function to send a Telegram message
 async function sendTelegramMessage(text) {
@@ -43,42 +48,22 @@ async function scrapeAllPostLinks(targetURL) {
     }
 }
 
-// Function to download a magnet link using WebTorrent
-function downloadMagnet(magnetURI) {
-    console.log('Starting download for:', magnetURI);
+// Function to check for new notifications
+async function checkForNewPosts() {
+    const seenLinks = new Set(); // To track seen links
+    const postLinksPromises = settings.urlsToMonitor.map(url => scrapeAllPostLinks(url));
 
-    client.add(magnetURI, { path: path.join(__dirname, 'downloads') }, (torrent) => {
-        console.log(`Downloading: ${torrent.name}`);
-
-        torrent.on('download', () => {
-            console.log(`Progress: ${(torrent.progress * 100).toFixed(2)}%`);
-        });
-
-        torrent.on('done', () => {
-            console.log('Download complete!');
-            sendTelegramMessage(`Download complete: ${torrent.name}`);
-            client.destroy(); // Clean up after download
-        });
-    });
-
-    client.on('error', (err) => {
-        console.error('Torrent error:', err.message);
+    const allPostLinks = await Promise.all(postLinksPromises);
+    allPostLinks.flat().forEach(link => {
+        if (!seenLinks.has(link)) {
+            seenLinks.add(link); // Mark link as seen
+            console.log(`New Post Found: ${link}`);
+            sendTelegramMessage(`New Post Found: ${link}`); // Notify Telegram
+        }
     });
 }
 
-// Main function to scrape links, notify, and download if applicable
+// Main function to start the bot
 (async () => {
-    const targetURL = 'https://www.1tamilmv.wf/'; // Replace with your target website
-    const postLinks = await scrapeAllPostLinks(targetURL);
-
-    // Output all post links and send notifications
-    for (const link of postLinks) {
-        console.log(`New Post Found: ${link}`);
-        await sendTelegramMessage(`New Post Found: ${link}`);
-        
-        // Example: If the link is a magnet link, download it
-        if (link.startsWith('magnet:?')) {
-            downloadMagnet(link);
-        }
-    }
+    await checkForNewPosts();
 })();
