@@ -10,7 +10,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 logger = logging.getLogger(__name__)
 
 TOKEN = os.getenv('TOKEN')  # Telegram Bot Token
-WEBSITE_URL = 'https://www.1tamilmv.wf/'  # URL of the website to scrape
+WEBSITE_URL = 'https://www.1tamilmv.wf'  # URL of the website to scrape
 
 def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
@@ -21,15 +21,18 @@ def get_links(update: Update, context: CallbackContext) -> None:
     response = requests.get(WEBSITE_URL)
     soup = BeautifulSoup(response.text, 'html.parser')
 
-    # Assuming that posts are contained in <a> tags with a specific class
-    posts = soup.find_all('a', class_='post-link')
-    
-    if posts:
-        for post in posts:
-            link = post.get('href')
-            title = post.get_text()
-            message = f"{title}\n{link}"
-            update.message.reply_text(message)
+    # Updated to reflect a hypothetical correct HTML structure
+    articles = soup.find_all('article', class_='post-entry')  # Adjust class as needed
+    links_found = []
+
+    for article in articles:
+        link_tag = article.find('a')  # Assuming the first <a> tag is the desired link
+        if link_tag and link_tag['href']:
+            links_found.append(f"{link_tag.text.strip()}\n{link_tag['href']}")
+
+    if links_found:
+        for link in links_found:
+            update.message.reply_text(link)
     else:
         update.message.reply_text('No posts found!')
 
